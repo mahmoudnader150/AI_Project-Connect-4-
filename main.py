@@ -83,13 +83,13 @@ class BoardGUI:
         self.font = pygame.font.SysFont(None, 48)
 
     def draw_board(self):
-        self.screen.fill((0, 0, 255))
+        self.screen.fill((11, 11, 69))
 
         for row in range(self.rows):
             for col in range(self.cols):
                 x = col * self.cell_size
                 y = (row + 1) * self.cell_size
-                pygame.draw.circle(self.screen, (0, 0, 0), (
+                pygame.draw.circle(self.screen, (255, 255, 255), (
                     x + self.cell_size // 2, y + self.cell_size // 2), self.cell_size // 2 - 4, 4)
                 if self.board.board[row][col] == '1':
                     pygame.draw.circle(self.screen, (255, 0, 0), (
@@ -147,7 +147,7 @@ def main():
     board = Board(6, 7)
 
     # Initialize the players
-    players = ['X', 'O']
+    players = ['1', '2']
     current_player = 0
 
     # Play the game
