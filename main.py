@@ -75,45 +75,57 @@ def winning_move(board, piece):
                 return True
 
 
-def score_position(board, piece):
-    # horizontal score
+def evaluate_window(window, piece):
     score = 0
+    opp_piece = PLAYER_PIECE
+    if piece == PLAYER_PIECE:
+        opp_piece = AI_PIECE
+    if window.count(piece) == 4:
+        score += 100
+    elif window.count(piece) == 3 and window.count(EMPTY) == 1:
+        score += 10
+    elif window.count(piece) == 2 and window.count(EMPTY) == 2:
+        score += 5
+
+    if window.count(opp_piece) == 3 and window.count(EMPTY) == 1:
+        score -= 80
+
+    return score
+
+
+def score_position(board, piece):
+    score = 0
+
+    # center column score
+    center_array = [int(i) for i in list(board[:, COLUMN_COUNT//2])]
+    center_count = center_array.count(piece)
+    score += center_count*6
+
+    # horizontal score
     for r in range(ROW_COUNT):
         row_array = [int(i) for i in list(board[r, :])]
         for c in range(COLUMN_COUNT):
             window = row_array[c:c+WINDOW_LENGTH]
-            if window.count(piece) == 4:
-                score += 100
-            elif window.count(piece) == 3 and window.count(EMPTY) == 1:
-                score += 10
+            score += evaluate_window(window, piece)
 
     # vertical score
     for c in range(COLUMN_COUNT):
         col_array = [int(i) for i in list(board[:, c])]
         for r in range(ROW_COUNT-3):
             window = col_array[r:r+WINDOW_LENGTH]
-            if window.count(piece) == 4:
-                score += 100
-            elif window.count(piece) == 3 and window.count(EMPTY) == 1:
-                score += 10
+            score += evaluate_window(window, piece)
 
     # positive slope
     for r in range(ROW_COUNT-3):
         for c in range(COLUMN_COUNT-3):
             window = [board[r+i][c+i] for i in range(WINDOW_LENGTH)]
-            if window.count(piece) == 4:
-                score += 100
-            elif window.count(piece) == 3 and window.count(EMPTY) == 1:
-                score += 10
+            score += evaluate_window(window, piece)
 
     # Negative Slope
     for r in range(ROW_COUNT-3):
         for c in range(COLUMN_COUNT-3):
             window = [board[r+3-i][c+i] for i in range(WINDOW_LENGTH)]
-            if window.count(piece) == 4:
-                score += 100
-            elif window.count(piece) == 3 and window.count(EMPTY) == 1:
-                score += 10
+            score += evaluate_window(window, piece)
 
     return score
 
@@ -130,7 +142,7 @@ def get_valid_locations(board):
 # get best move by from all possibilities
 def pick_best_move(board, piece):
     valid_locations = get_valid_locations(board)
-    best_score = 0
+    best_score = -10000
     best_col = random.choice(valid_locations)
     for col in valid_locations:
         row = get_next_open_row(board, col)
