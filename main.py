@@ -145,7 +145,7 @@ def minimax(board, depth, maximizingplayer):
         if is_terminal:
             if winning_move(board, AI_PIECE):
                 return (None, 1000000000000000)
-            elif winning_move(board, AI_PIECE):
+            elif winning_move(board, PLAYER_PIECE):
                 return (None, -1000000000000000)
             else:  # game is over
                 return (None, 0)
@@ -299,7 +299,7 @@ while not game_over:
 
         #col = random.randint(0, COLUMN_COUNT-1)
         #col = pick_best_move(board, AI_PIECE)
-        col, minimax_score = minimax(board, 3, True)
+        col, minimax_score = minimax(board, 2, True)
         if is_valid_location(board, col):
             # delay time
             pygame.time.wait(500)
