@@ -83,12 +83,12 @@ def evaluate_window(window, piece):
     if window.count(piece) == 4:
         score += 100
     elif window.count(piece) == 3 and window.count(EMPTY) == 1:
-        score += 10
-    elif window.count(piece) == 2 and window.count(EMPTY) == 2:
         score += 5
+    elif window.count(piece) == 2 and window.count(EMPTY) == 2:
+        score += 2
 
     if window.count(opp_piece) == 3 and window.count(EMPTY) == 1:
-        score -= 80
+        score -= 4
 
     return score
 
@@ -99,7 +99,7 @@ def score_position(board, piece):
     # center column score
     center_array = [int(i) for i in list(board[:, COLUMN_COUNT//2])]
     center_count = center_array.count(piece)
-    score += center_count*6
+    score += center_count*3
 
     # horizontal score
     for r in range(ROW_COUNT):
@@ -137,7 +137,7 @@ def is_terminal_nade(board):
 # minimax fuction
 
 
-def minimax(board, depth, maximizingplayer):
+def minimax(board, depth, alpha, beta, maximizingplayer):
     valid_locations = get_valid_locations(board)
     is_terminal = is_terminal_nade(board)
     # base case
@@ -160,10 +160,13 @@ def minimax(board, depth, maximizingplayer):
             row = get_next_open_row(board, col)
             b_copy = board.copy()
             drop_piece(b_copy, row, col, AI_PIECE)
-            new_score = minimax(b_copy, depth-1, False)[1]
+            new_score = minimax(b_copy, depth-1, alpha, beta, False)[1]
             if new_score > value:
                 value = new_score
                 column = col
+            alpha = max(alpha, value)
+            if(alpha >= beta):
+                break
         return column, value
 
     else:  # Minimizing Player
@@ -173,10 +176,13 @@ def minimax(board, depth, maximizingplayer):
             row = get_next_open_row(board, col)
             b_copy = board.copy()
             drop_piece(b_copy, row, col, PLAYER_PIECE)
-            new_score = minimax(b_copy, depth-1, True)[1]
+            new_score = minimax(b_copy, depth-1, alpha, beta, True)[1]
             if new_score < value:
                 value = new_score
                 column = col
+            beta = min(beta, value)
+            if alpha >= beta:
+                break
         return column, value
 
 
@@ -299,7 +305,7 @@ while not game_over:
 
         #col = random.randint(0, COLUMN_COUNT-1)
         #col = pick_best_move(board, AI_PIECE)
-        col, minimax_score = minimax(board, 2, True)
+        col, minimax_score = minimax(board, 4, -math.inf, math.inf, True)
         if is_valid_location(board, col):
             # delay time
             pygame.time.wait(500)
