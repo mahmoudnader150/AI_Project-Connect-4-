@@ -210,35 +210,38 @@ def pick_best_move(board, piece):
         if(score > best_score):
             best_score = score
             best_col = col
+
     return best_col
 
 
-# def draw_board(board):
-#     for c in range(COLUMN_COUNT):
-#         for r in range(ROW_COUNT):
-#             pygame.draw.rect(
-#                 screen, BLUE, (c*SQUARESIZE, r*SQUARESIZE+SQUARESIZE, SQUARESIZE, SQUARESIZE))
-#             pygame.draw.circle(
-#                 screen, BLACK, (int(c*SQUARESIZE+SQUARESIZE/2),   int(r*SQUARESIZE+SQUARESIZE+SQUARESIZE/2)), RADIUS)
+def draw_board(board):
+    for c in range(COLUMN_COUNT):
+        for r in range(ROW_COUNT):
+            pygame.draw.rect(
+                screen, BLUE, (c*SQUARESIZE, r*SQUARESIZE+SQUARESIZE, SQUARESIZE, SQUARESIZE))
+            pygame.draw.circle(
+                screen, BLACK, (int(c*SQUARESIZE+SQUARESIZE/2),   int(r*SQUARESIZE+SQUARESIZE+SQUARESIZE/2)), RADIUS)
 
-#     for c in range(COLUMN_COUNT):
-#         for r in range(ROW_COUNT):
-#             # color cell depending on value
-#             if board[r][c] == PLAYER_PIECE:
-#                 pygame.draw.circle(
-#                     screen, RED, (int(c*SQUARESIZE+SQUARESIZE/2), height - int(r*SQUARESIZE + SQUARESIZE/2)), RADIUS)
-#             elif board[r][c] == AI_PIECE:
-#                 pygame.draw.circle(
-#                     screen, YELLOW, (int(c*SQUARESIZE+SQUARESIZE/2), height - int(r*SQUARESIZE + SQUARESIZE/2)), RADIUS)
-#     # update screen after changes
-#     pygame.display.update()
+    for c in range(COLUMN_COUNT):
+        for r in range(ROW_COUNT):
+            # color cell depending on value
+            if board[r][c] == PLAYER_PIECE:
+                pygame.draw.circle(
+                    screen, RED, (int(c*SQUARESIZE+SQUARESIZE/2), height - int(r*SQUARESIZE + SQUARESIZE/2)), RADIUS)
+            elif board[r][c] == AI_PIECE:
+                pygame.draw.circle(
+                    screen, YELLOW, (int(c*SQUARESIZE+SQUARESIZE/2), height - int(r*SQUARESIZE + SQUARESIZE/2)), RADIUS)
+    # update screen after changes
+    pygame.display.update()
 
 
+board = create_board()
+print_board(board)
 game_over = False
 
 
 # start screen
-
+pygame.init()
 
 SQUARESIZE = 100
 
@@ -249,5 +252,77 @@ size = (width, height)
 
 RADIUS = int(SQUARESIZE/2 - 5)   # radius of circles
 
+screen = pygame.display.set_mode(size)
+draw_board(board)
+pygame.display.update()
 
+
+FONT = pygame.font.SysFont("arial.ttf", 80)
+
+turn = random.randint(PLAYER, AI)
 # while game not ende
+while not game_over:
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            sys.exit()
+        # event for mouse motion
+        if event.type == pygame.MOUSEMOTION:
+            # delete circles
+            pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))
+            posx = event.pos[0]
+            if turn == PLAYER:
+                pygame.draw.circle(
+                    screen, RED, (posx, int(SQUARESIZE/2)), RADIUS)
+
+        pygame.display.update()
+        # mouse button down event
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            # Move tile after win
+            pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))
+            # Player 1 input
+            if turn == PLAYER:
+                # dimensions of piece equation
+                posx = event.pos[0]
+                col = int(math.floor(posx/SQUARESIZE))
+
+                if is_valid_location(board, col):
+                    row = get_next_open_row(board, col)
+                    drop_piece(board, row, col, PLAYER_PIECE)
+
+                    if winning_move(board, PLAYER_PIECE):
+                        label = FONT.render("Player 1 WINS !!!", 1, RED)
+                        screen.blit(label, (40, 10))
+                        game_over = True
+                turn += 1
+                turn = turn % 2
+
+                print_board(board)
+                draw_board(board)
+
+    # ai turn
+    if turn == AI and not game_over:
+
+        #col = random.randint(0, COLUMN_COUNT-1)
+        #col = pick_best_move(board, AI_PIECE)
+        col, minimax_score = minimax(board, 4, -math.inf, math.inf, True)
+        if is_valid_location(board, col):
+            # delay time
+            pygame.time.wait(500)
+            row = get_next_open_row(board, col)
+            drop_piece(board, row, col, AI_PIECE)
+
+            if winning_move(board, AI_PIECE):
+                label = FONT.render("Computer WINS !!!", 2, YELLOW)
+                screen.blit(label, (40, 10))
+                game_over = True
+
+            # exchang turns
+            turn += 1
+            turn = turn % 2
+
+            print_board(board)
+            draw_board(board)
+
+    if game_over:
+        pygame.time.wait(3000)
