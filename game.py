@@ -61,3 +61,34 @@ def main():
 
 if __name__ == "__main__":
     main()
+def choose_depth():
+    root = tk.Tk()
+    root.title("Connect Four Depth Selection")
+
+    def set_depth(value):
+        nonlocal depth
+        depth = int(value)
+
+    depth = 2
+
+    def start_game():
+        nonlocal root
+        root.destroy()
+
+    tk.Label(root, text="Select Depth:").pack()
+
+    depth_var = tk.StringVar(root, value=str(depth))
+    depth_scale = tk.Scale(root, from_=2, to=6,
+                           orient=tk.HORIZONTAL, variable=depth_var)
+    depth_scale.pack()
+
+    start_button = tk.Button(root, text="Start Game", command=start_game)
+    start_button.pack()
+
+    root.mainloop()
+
+    return depth
+
+
+if __name__ == "__main__":
+    main()
