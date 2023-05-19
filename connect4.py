@@ -3,6 +3,7 @@ import random
 import pygame
 import sys
 import math
+import tkinter as tk
 
 BLUE = (0, 0, 255)
 BLACK = (0, 0, 0)
@@ -243,6 +244,41 @@ myfont = pygame.font.SysFont("monospace", 75)
 
 turn = random.randint(PLAYER, AI)
 
+
+def choose_depth():
+    root = tk.Tk()
+    root.title("Connect Four Depth Selection")
+    root.geometry("300x300")  # Set the frame size
+
+    def set_depth(value):
+        nonlocal depth
+        depth = int(value)
+
+    depth = 2
+
+    def select_depth(value):
+        set_depth(value)
+        root.destroy()
+
+    tk.Label(root, text="Select Difficulty:").pack()
+
+    difficulty_labels = ["Easy", "Medium", "Hard", "Expert", "Master"]
+    button_colors = ["light blue", "light green", "yellow", "orange", "red"]
+
+    for i, label in enumerate(difficulty_labels, start=2):
+        depth_button = tk.Button(root, text=label, width=10, height=2,
+                                 command=lambda v=i: select_depth(v),
+                                 bg=button_colors[i-2])  # Set button background color
+        depth_button.pack(pady=5)
+
+    root.mainloop()
+
+    return depth
+
+
+depth = choose_depth()
+
+
 while not game_over:
 
     pygame.display.update()
@@ -273,7 +309,8 @@ while not game_over:
         pygame.time.wait(1000)
         # col = random.randint(0, COLUMN_COUNT-1)
         # col = pick_best_move(board, AI_PIECE)
-        col, minimax_score = minimax(board, 5, -math.inf, math.inf, True)
+        print(depth)
+        col, minimax_score = minimax(board, depth, -math.inf, math.inf, True)
 
         if is_valid_location(board, col):
             # pygame.time.wait(500)

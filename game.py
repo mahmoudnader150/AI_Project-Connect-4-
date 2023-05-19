@@ -63,8 +63,6 @@ def main():
             break
 
 
-if __name__ == "__main__":
-    main()
 def choose_depth():
     root = tk.Tk()
     root.title("Connect Four Depth Selection")
