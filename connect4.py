@@ -177,6 +177,48 @@ def minimax(board, depth, alpha, beta, maximizingPlayer):
         return column, value
 
 
+def minimaxonly(board, depth,  maximizingPlayer):
+    valid_locations = get_valid_locations(board)
+    is_terminal = is_terminal_node(board)
+    if depth == 0 or is_terminal:
+        if is_terminal:
+            if winning_move(board, AI_PIECE):
+                return (None, 100000000000000)
+            elif winning_move(board, PLAYER_PIECE):
+                return (None, -10000000000000)
+            else:  # Game is over, no more valid moves
+                return (None, 0)
+        else:  # Depth is zero
+            return (None, score_position(board, AI_PIECE))
+    if maximizingPlayer:
+        value = -math.inf
+        column = random.choice(valid_locations)
+        for col in valid_locations:
+            row = get_next_open_row(board, col)
+            b_copy = board.copy()
+            drop_piece(b_copy, row, col, AI_PIECE)
+            new_score = minimaxonly(b_copy, depth-1, False)[1]
+            if new_score > value:
+                value = new_score
+                column = col
+
+        return column, value
+
+    else:  # Minimizing player
+        value = math.inf
+        column = random.choice(valid_locations)
+        for col in valid_locations:
+            row = get_next_open_row(board, col)
+            b_copy = board.copy()
+            drop_piece(b_copy, row, col, PLAYER_PIECE)
+            new_score = minimaxonly(b_copy, depth-1,  True)[1]
+            if new_score < value:
+                value = new_score
+                column = col
+
+        return column, value
+
+
 def get_valid_locations(board):
     valid_locations = []
     for col in range(COLUMN_COUNT):
@@ -245,6 +287,37 @@ myfont = pygame.font.SysFont("monospace", 75)
 turn = random.randint(PLAYER, AI)
 
 
+def choose_algorithm():
+    root = tk.Tk()
+    root.title("Connect Four Algorithm Selection")
+    root.geometry("300x300")  # Set the frame size
+
+    def set_algorithm(value):
+        nonlocal algorithm
+        algorithm = int(value)
+
+    algorithm = 1
+
+    def select_algorithm(value):
+        set_algorithm(value)
+        root.destroy()
+
+    tk.Label(root, text="Select Algorithm:").pack()
+
+    algorithm_labels = ["Minimax", "Alpha-Beta"]
+    button_colors = ["light blue", "light green"]
+
+    for i, label in enumerate(algorithm_labels, start=1):
+        algorithm_button = tk.Button(root, text=label, width=10, height=2,
+                                     command=lambda v=i: select_algorithm(v),
+                                     bg=button_colors[i-1])  # Set button background color
+        algorithm_button.pack(pady=5)
+
+    root.mainloop()
+
+    return algorithm
+
+
 def choose_depth():
     root = tk.Tk()
     root.title("Connect Four Depth Selection")
@@ -277,8 +350,8 @@ def choose_depth():
 
 
 depth = choose_depth()
-
-
+alg = choose_algorithm()
+print(alg)
 while not game_over:
 
     pygame.display.update()
@@ -310,8 +383,11 @@ while not game_over:
         # col = random.randint(0, COLUMN_COUNT-1)
         # col = pick_best_move(board, AI_PIECE)
         print(depth)
-        col, minimax_score = minimax(board, depth, -math.inf, math.inf, True)
-
+        if(alg == 1):
+            col, minimax_score = minimaxonly(board, depth, True)
+        else:
+            col, minimax_score = minimax(
+                board, depth, -math.inf, math.inf, True)
         if is_valid_location(board, col):
             # pygame.time.wait(500)
             row = get_next_open_row(board, col)
